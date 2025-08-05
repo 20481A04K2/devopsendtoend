@@ -91,32 +91,9 @@ pipeline {
       }
     }
 
-    stage('Stage - 8 - Create MySQL Table') {
-      steps {
-        sh '''
-          sudo apt-get update && sudo apt-get install -y mysql-client
+   
 
-          wget -q https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -O cloud_sql_proxy
-          chmod +x cloud_sql_proxy
-
-          trap 'pkill -f cloud_sql_proxy' EXIT
-          ./cloud_sql_proxy -dir=/cloudsql -instances=${INSTANCE_CONNECTION_NAME} &
-          sleep 10
-
-          echo "Creating table if not exists..."
-          mysql --host=127.0.0.1 --user=${DB_USER} --password=${DB_PASSWORD} --database=${DB_NAME} -e "
-            CREATE TABLE IF NOT EXISTS users (
-              id INT AUTO_INCREMENT PRIMARY KEY,
-              name VARCHAR(100),
-              age INT,
-              city VARCHAR(100)
-            );
-          "
-        '''
-      }
-    }
-
-    stage('Stage - 9 - Deploy to Cloud Run') {
+    stage('Stage - 8 - Deploy to Cloud Run') {
       steps {
         sh '''
           echo "🚀 Deploying to Cloud Run..."
