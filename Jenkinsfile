@@ -91,9 +91,15 @@ pipeline {
       }
     }
 
-   
+    stage('Stage - 8 - Approval for Deployment') {
+      steps {
+        script {
+          input message: "🛑 Do you approve deployment to Cloud Run?", ok: "✅ Deploy", submitter: "sajja_vamsi"
+        }
+      }
+    }
 
-    stage('Stage - 8 - Deploy to Cloud Run') {
+    stage('Stage - 9 - Deploy to Cloud Run') {
       steps {
         sh '''
           echo "🚀 Deploying to Cloud Run..."
@@ -107,7 +113,6 @@ pipeline {
         '''
       }
     }
-
   }
 
   post {
