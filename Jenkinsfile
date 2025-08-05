@@ -19,7 +19,7 @@ pipeline {
     stage('Stage - 1 - Checkout') {
       steps {
         git branch: 'main',
-            url: 'https://github.com/Praveenarumugam07/devops-application-deployment'
+            url: 'https://github.com/20481A04K2/devopsendtoend.git'
       }
     }
 
