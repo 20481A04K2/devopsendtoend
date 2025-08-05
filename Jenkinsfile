@@ -31,8 +31,8 @@ pipeline {
             /opt/sonar-scanner/bin/sonar-scanner \
               -Dsonar.projectKey=my-python-app \
               -Dsonar.sources=. \
-              -Dsonar.host.url=http://35.185.136.91:9000 \
-              -Dsonar.login=sqa_42cdf4f1770a35967789c2eb583a85b848763b37
+              -Dsonar.host.url=http://35.184.37.88:9000 \
+              -Dsonar.login=sqa_181f243156df8fba2682acfca191637ce7f5af32
           '''
         }
       }
