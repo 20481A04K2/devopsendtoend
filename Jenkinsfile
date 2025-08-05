@@ -24,18 +24,16 @@ pipeline {
     }
 
     stage('Stage - 2 - SonarQube Analysis') {
-      environment {
-        SONARQUBE_SCANNER_HOME = tool 'SonarQubeScanner'
-      }
       steps {
         withSonarQubeEnv('MySonar') {
-          sh """
-            ${SONARQUBE_SCANNER_HOME}/bin/sonar-scanner \\
-              -Dsonar.projectKey=my-python-app \\
-              -Dsonar.sources=. \\
-              -Dsonar.host.url=http://35.185.136.91:9000 \\
+          sh '''
+            echo "🔍 Running SonarQube Scanner..."
+            /opt/sonar-scanner/bin/sonar-scanner \
+              -Dsonar.projectKey=my-python-app \
+              -Dsonar.sources=. \
+              -Dsonar.host.url=http://35.185.136.91:9000 \
               -Dsonar.login=sqa_42cdf4f1770a35967789c2eb583a85b848763b37
-          """
+          '''
         }
       }
     }
@@ -55,23 +53,20 @@ pipeline {
     }
 
     stage('Docker Image Security Scan - Trivy') {
-    steps {
-        script {
-            sh '''
-                mkdir -p /home/jenkins/trivy-cache
-                mkdir -p /home/jenkins/trivy-temp
+      steps {
+        sh '''
+          mkdir -p /home/jenkins/trivy-cache
+          mkdir -p /home/jenkins/trivy-temp
 
-                trivy image \
-                    --exit-code 0 \
-                    --severity MEDIUM,HIGH,CRITICAL \
-                    --cache-dir /home/jenkins/trivy-cache \
-                    --tempdir /home/jenkins/trivy-temp \
-                    us-central1-docker.pkg.dev/sylvan-hydra-464904-d9/devops-app/user-management-app
-            '''
-        }
+          trivy image \
+            --exit-code 0 \
+            --severity MEDIUM,HIGH,CRITICAL \
+            --cache-dir /home/jenkins/trivy-cache \
+            --tempdir /home/jenkins/trivy-temp \
+            us-central1-docker.pkg.dev/sylvan-hydra-464904-d9/devops-app/user-management-app
+        '''
+      }
     }
-}
-
 
     stage('Stage - 6 - Fix Vulnerability by Snyk') {
       steps {
