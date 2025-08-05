@@ -2,7 +2,8 @@ from flask import Flask, render_template, request, redirect, url_for
 import mysql.connector
 from mysql.connector import Error
 
-app = Flask(__name__)
+# 👇 Tell Flask to use the 'template' folder for HTML files
+app = Flask(__name__, template_folder='template')
 
 # Cloud SQL (MySQL) Public IP configuration
 db_config = {
@@ -88,4 +89,3 @@ def data():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
-
