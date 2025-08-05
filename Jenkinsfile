@@ -48,22 +48,25 @@ pipeline {
 
     stage('Stage - 4 - Docker Image Build') {
       steps {
-        sh "docker build -t ${FULL_IMAGE_NAME} ."
+        sh '''
+          echo "🐳 Building Docker image..."
+          docker build -t ${FULL_IMAGE_NAME}:latest .
+        '''
       }
     }
 
-    stage('Docker Image Security Scan - Trivy') {
+    stage('Stage - 5 - Docker Image Security Scan - Trivy') {
       steps {
         sh '''
-          mkdir -p /home/jenkins/trivy-cache
-          mkdir -p /home/jenkins/trivy-temp
+          mkdir -p $WORKSPACE/trivy-cache
+          mkdir -p $WORKSPACE/trivy-temp
 
           trivy image \
             --exit-code 0 \
             --severity MEDIUM,HIGH,CRITICAL \
-            --cache-dir /home/jenkins/trivy-cache \
-            --tempdir /home/jenkins/trivy-temp \
-            us-central1-docker.pkg.dev/sylvan-hydra-464904-d9/devops-app/user-management-app
+            --cache-dir $WORKSPACE/trivy-cache \
+            --tempdir $WORKSPACE/trivy-temp \
+            ${FULL_IMAGE_NAME}:latest
         '''
       }
     }
@@ -72,9 +75,6 @@ pipeline {
       steps {
         withCredentials([string(credentialsId: 'snyk-token', variable: 'SNYK_TOKEN')]) {
           sh '''
-            mkdir -p snyk_scan
-            cd snyk_scan
-            npm init -y
             npm install snyk
             npx snyk auth $SNYK_TOKEN
             npx snyk test
@@ -89,14 +89,11 @@ pipeline {
           sh '''
             echo "🔐 Authenticating to GCP..."
             gcloud auth activate-service-account --key-file=$GCLOUD_KEY
-            gcloud config set project sylvan-hydra-464904-d9
-            gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
-
-            echo "🐳 Building Docker image..."
-            docker build -t us-central1-docker.pkg.dev/sylvan-hydra-464904-d9/devops-app/user-management-app:latest .
+            gcloud config set project ${PROJECT_ID}
+            gcloud auth configure-docker ${REGION}-docker.pkg.dev --quiet
 
             echo "📦 Pushing Docker image to Artifact Registry..."
-            docker push us-central1-docker.pkg.dev/sylvan-hydra-464904-d9/devops-app/user-management-app:latest
+            docker push ${FULL_IMAGE_NAME}:latest
           '''
         }
       }
@@ -110,6 +107,8 @@ pipeline {
 
             wget -q https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -O cloud_sql_proxy
             chmod +x cloud_sql_proxy
+
+            trap 'pkill -f cloud_sql_proxy' EXIT
             ./cloud_sql_proxy -dir=/cloudsql -instances=${INSTANCE_CONNECTION_NAME} &
             sleep 10
 
@@ -134,7 +133,7 @@ pipeline {
             gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
             gcloud config set project ${PROJECT_ID}
             gcloud run deploy ${SERVICE_NAME} \
-              --image ${FULL_IMAGE_NAME} \
+              --image ${FULL_IMAGE_NAME}:latest \
               --platform managed \
               --region ${REGION} \
               --allow-unauthenticated \
