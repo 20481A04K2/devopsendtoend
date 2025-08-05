@@ -59,8 +59,6 @@ pipeline {
       steps {
         sh '''
           mkdir -p $WORKSPACE/trivy-cache
-         
-
           trivy image \
             --exit-code 0 \
             --severity MEDIUM,HIGH,CRITICAL \
@@ -82,57 +80,54 @@ pipeline {
       }
     }
 
-        stage('Push to Artifact Registry') {
+    stage('Stage - 7 - Push to Artifact Registry') {
       steps {
         sh '''
-          gcloud config set project $PROJECT_ID
-          gcloud auth configure-docker $REGION-docker.pkg.dev --quiet
+          echo "📦 Pushing Docker image to Artifact Registry..."
+          gcloud config set project ${PROJECT_ID}
+          gcloud auth configure-docker ${REGION}-docker.pkg.dev --quiet
           docker push ${FULL_IMAGE_NAME}:latest
         '''
       }
     }
-    
+
     stage('Stage - 8 - Create MySQL Table') {
       steps {
-        withCredentials([file(credentialsId: 'gcp-service-account', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
-          sh '''
-            sudo apt-get update && sudo apt-get install -y mysql-client
+        sh '''
+          sudo apt-get update && sudo apt-get install -y mysql-client
 
-            wget -q https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -O cloud_sql_proxy
-            chmod +x cloud_sql_proxy
+          wget -q https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -O cloud_sql_proxy
+          chmod +x cloud_sql_proxy
 
-            trap 'pkill -f cloud_sql_proxy' EXIT
-            ./cloud_sql_proxy -dir=/cloudsql -instances=${INSTANCE_CONNECTION_NAME} &
-            sleep 10
+          trap 'pkill -f cloud_sql_proxy' EXIT
+          ./cloud_sql_proxy -dir=/cloudsql -instances=${INSTANCE_CONNECTION_NAME} &
+          sleep 10
 
-            echo "Creating table if not exists..."
-            mysql --host=127.0.0.1 --user=${DB_USER} --password=${DB_PASSWORD} --database=${DB_NAME} -e "
-              CREATE TABLE IF NOT EXISTS users (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                name VARCHAR(100),
-                age INT,
-                city VARCHAR(100)
-              );
-            "
-          '''
-        }
+          echo "Creating table if not exists..."
+          mysql --host=127.0.0.1 --user=${DB_USER} --password=${DB_PASSWORD} --database=${DB_NAME} -e "
+            CREATE TABLE IF NOT EXISTS users (
+              id INT AUTO_INCREMENT PRIMARY KEY,
+              name VARCHAR(100),
+              age INT,
+              city VARCHAR(100)
+            );
+          "
+        '''
       }
     }
 
     stage('Stage - 9 - Deploy to Cloud Run') {
       steps {
-        withCredentials([file(credentialsId: 'gcp-service-account', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
-          sh '''
-            gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
-            gcloud config set project ${PROJECT_ID}
-            gcloud run deploy ${SERVICE_NAME} \
-              --image ${FULL_IMAGE_NAME}:latest \
-              --platform managed \
-              --region ${REGION} \
-              --allow-unauthenticated \
-              --set-env-vars INSTANCE_CONNECTION_NAME=${INSTANCE_CONNECTION_NAME},DB_USER=${DB_USER},DB_PASSWORD=${DB_PASSWORD},DB_NAME=${DB_NAME}
-          '''
-        }
+        sh '''
+          echo "🚀 Deploying to Cloud Run..."
+          gcloud config set project ${PROJECT_ID}
+          gcloud run deploy ${SERVICE_NAME} \
+            --image ${FULL_IMAGE_NAME}:latest \
+            --platform managed \
+            --region ${REGION} \
+            --allow-unauthenticated \
+            --set-env-vars INSTANCE_CONNECTION_NAME=${INSTANCE_CONNECTION_NAME},DB_USER=${DB_USER},DB_PASSWORD=${DB_PASSWORD},DB_NAME=${DB_NAME}
+        '''
       }
     }
 
