@@ -2,15 +2,15 @@ from flask import Flask, render_template, request, redirect, url_for
 import mysql.connector
 from mysql.connector import Error
 
-# 👇 Tell Flask to use the 'template' folder for HTML files
+# Tell Flask to use the 'template' folder
 app = Flask(__name__, template_folder='template')
 
 # Cloud SQL (MySQL) Public IP configuration
 db_config = {
-    'host': '104.155.157.238',       # Your Cloud SQL Public IP
-    'user': 'appuser',               # DB Username
-    'password': 'Praveen@123',       # DB Password
-    'database': 'user_management'    # DB Name
+    'host': '104.155.157.238',
+    'user': 'appuser',
+    'password': 'Praveen@123',
+    'database': 'user_management'
 }
 
 # Function to get MySQL connection
@@ -30,23 +30,31 @@ def index():
 
 @app.route('/submit', methods=['POST'])
 def submit():
-    name = request.form['name']
-    age = request.form['age']
-    city = request.form['city']
-    
+    # Getting form fields
+    name = request.form.get('name')
+    email = request.form.get('email')
+    password = request.form.get('password')
+    address = request.form.get('address')
+    phone = request.form.get('phonenumber')
+
+    # Insert into database
     conn = get_db_connection()
     if conn:
         try:
             cursor = conn.cursor()
-            cursor.execute("INSERT INTO users (name, age, city) VALUES (%s, %s, %s)", (name, age, city))
+            cursor.execute("""
+                INSERT INTO users (name, email, password, address, phone)
+                VALUES (%s, %s, %s, %s, %s)
+            """, (name, email, password, address, phone))
             conn.commit()
-            print("✅ Data inserted successfully!")
+            print("✅ User inserted successfully!")
         except Error as e:
-            print(f"❌ Error inserting data: {e}")
+            print(f"❌ Error inserting user: {e}")
         finally:
             cursor.close()
             conn.close()
-    return render_template("submitteddata.html", name=name, age=age, city=city)
+
+    return render_template("submitteddata.html", name=name)
 
 @app.route('/getdata')
 def getdata():
