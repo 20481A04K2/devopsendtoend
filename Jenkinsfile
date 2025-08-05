@@ -33,8 +33,8 @@ pipeline {
             ${SONARQUBE_SCANNER_HOME}/bin/sonar-scanner \\
               -Dsonar.projectKey=my-python-app \\
               -Dsonar.sources=. \\
-              -Dsonar.host.url=http://34.10.18.198:9000 \\
-              -Dsonar.login=squ_545cc0ce58e1b73dfca17e7bce2fb351eff7b953
+              -Dsonar.host.url=http://35.185.136.91:9000 \\
+              -Dsonar.login=sqa_42cdf4f1770a35967789c2eb583a85b848763b37
           """
         }
       }
