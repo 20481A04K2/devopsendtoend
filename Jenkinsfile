@@ -59,13 +59,12 @@ pipeline {
       steps {
         sh '''
           mkdir -p $WORKSPACE/trivy-cache
-          mkdir -p $WORKSPACE/trivy-temp
+         
 
           trivy image \
             --exit-code 0 \
             --severity MEDIUM,HIGH,CRITICAL \
             --cache-dir $WORKSPACE/trivy-cache \
-            --tempdir $WORKSPACE/trivy-temp \
             ${FULL_IMAGE_NAME}:latest
         '''
       }
