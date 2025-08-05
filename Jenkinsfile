@@ -87,7 +87,7 @@ pipeline {
         sh '''
           gcloud config set project $PROJECT_ID
           gcloud auth configure-docker $REGION-docker.pkg.dev --quiet
-          docker push $AR_URL
+          docker push ${FULL_IMAGE_NAME}:latest
         '''
       }
     }
