@@ -82,22 +82,16 @@ pipeline {
       }
     }
 
-    stage('Stage - 7 - Push to Artifact Registry') {
+        stage('Push to Artifact Registry') {
       steps {
-        withCredentials([file(credentialsId: 'gcp-service-account', variable: 'GCLOUD_KEY')]) {
-          sh '''
-            echo "🔐 Authenticating to GCP..."
-            gcloud auth activate-service-account --key-file=$GCLOUD_KEY
-            gcloud config set project ${PROJECT_ID}
-            gcloud auth configure-docker ${REGION}-docker.pkg.dev --quiet
-
-            echo "📦 Pushing Docker image to Artifact Registry..."
-            docker push ${FULL_IMAGE_NAME}:latest
-          '''
-        }
+        sh '''
+          gcloud config set project $PROJECT_ID
+          gcloud auth configure-docker $REGION-docker.pkg.dev --quiet
+          docker push $AR_URL
+        '''
       }
     }
-
+    
     stage('Stage - 8 - Create MySQL Table') {
       steps {
         withCredentials([file(credentialsId: 'gcp-service-account', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
