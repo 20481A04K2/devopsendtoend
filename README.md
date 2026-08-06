@@ -1,4 +1,3 @@
-markdown
 # 🚀 DevOps End-to-End CI/CD Pipeline
 
 ### Production-Grade CI/CD for a 3-Tier Application on Google Cloud Run
@@ -50,24 +49,27 @@ An end-to-end, security-hardened DevOps pipeline that takes a Python-based 3-tie
 
 ## 🛠️ Tech Stack
 
-**Cloud & Infrastructure:** Google Cloud Run, Artifact Registry, Cloud SQL, Cloud SQL Auth Proxy
-**CI/CD:** Jenkins (declarative pipeline)
-**Containerization:** Docker
-**Code Quality & Security:** SonarQube, Trivy, Snyk
-**Languages:** Python, HTML
+| Category | Technologies |
+|---|---|
+| Cloud & Infrastructure | Google Cloud Run, Artifact Registry, Cloud SQL, Cloud SQL Auth Proxy |
+| CI/CD | Jenkins (declarative pipeline) |
+| Containerization | Docker |
+| Code Quality & Security | SonarQube, Trivy, Snyk |
+| Languages | Python, HTML |
 
 ---
 
 ## 📁 Repository Structure
 
-├── 3-tier-user-management-app-main/ # Application source code
-├── template/ # HTML templates
-├── Dockerfile # Container build definition
-├── Jenkinsfile # 9-stage CI/CD pipeline definition
-├── app.py # Application entry point
-├── requirements.txt # Python dependencies
-└── sonar-project.properties # SonarQube configuration
-
+```
+├── 3-tier-user-management-app-main/   # Application source code
+├── template/                          # HTML templates
+├── Dockerfile                         # Container build definition
+├── Jenkinsfile                        # 9-stage CI/CD pipeline definition
+├── app.py                             # Application entry point
+├── requirements.txt                   # Python dependencies
+└── sonar-project.properties           # SonarQube configuration
+```
 
 ---
 
@@ -112,4 +114,4 @@ Delivered a repeatable, secure, and fully automated deployment pipeline — redu
 
 **Sajja Vamsi**
 DevOps Engineer | GCP Dual-Certified
-[[LinkedIn](https://linkedin.com/in/sajja-vamsi)](https://www.linkedin.com/in/sajja-vamsi-b68481250/)
+[LinkedIn](https://www.linkedin.com/in/sajja-vamsi-b68481250/)
